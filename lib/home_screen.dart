@@ -13,9 +13,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
+  int selectedTileIndex = -1;
+
+  void _handleTileLongPress(int index) {
+    setState(() {
+      if (selectedTileIndex == index) {
+        selectedTileIndex = -1;
+      } else {
+        selectedTileIndex = index;
+      }
+    });
   }
 
   bool isTap = false;
@@ -63,33 +70,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.blueGrey,
                           ),
                       itemBuilder: (context, index) {
-                        return ListTile(
-                          trailing: SizedBox(
-                            width: 110.0,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit,
-                                      color: Colors.blue),
-                                  onPressed: () {},
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.blue,
-                                  ),
-                                  onPressed: () {},
-                                ),
-                              ],
-                            ),
-                          ),
-                          title: Text('${note[index].title}'),
-                          subtitle: (isTap == true)
-                              ? Text('${note[index].content}')
-                              : const Text(''),
-                          onTap: () {},
-                          onLongPress: () {},
+                        return _NoteList(
+                          note: note[index],
+                          isTap: isTap,
+                          isLongTap: selectedTileIndex == index,
+                          onLongPress: () => _handleTileLongPress(index),
                         );
                       }),
                   floatingActionButton: Row(
@@ -125,6 +110,66 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             });
       },
+    );
+  }
+}
+
+class _NoteList extends StatefulWidget {
+  final Note note;
+  final bool isTap;
+  final Function() onLongPress;
+  final bool isLongTap;
+  const _NoteList({
+    Key? key,
+    required this.note,
+    required this.isTap,
+    required this.onLongPress,
+    required this.isLongTap,
+  }) : super(key: key);
+
+  @override
+  State<_NoteList> createState() => _NoteListState();
+}
+
+class _NoteListState extends State<_NoteList> {
+  // bool isLongTap = false;
+
+  // void _toggleEditing() {
+  //   setState(() {
+  //     isLongTap = !isLongTap;
+  //   });
+  // }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text('${widget.note.title}'),
+      subtitle: (widget.isTap == true)
+          ? Text('${widget.note.content}')
+          : const Text(''),
+      trailing: widget.isLongTap
+          ? SizedBox(
+              width: 110.0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Colors.blue,
+                    ),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            )
+          : const SizedBox(),
+      onTap: () {},
+      onLongPress: widget.onLongPress,
     );
   }
 }
