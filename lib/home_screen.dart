@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:map_exam/edit_screen.dart';
 
 import 'note.dart';
 
@@ -77,7 +78,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           isLongTap: selectedTileIndex == index,
                           onLongPress: () => _handleTileLongPress(index),
                           onDelete: () {
-                            print(note[index].id);
                             setState(() {
                               FirebaseFirestore.instance
                                   .collection('notes-$uid')
@@ -85,28 +85,53 @@ class _HomeScreenState extends State<HomeScreen> {
                                   .delete();
                             });
                           },
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => EditScreen(
+                                          isView: true,
+                                          note: note[index],
+                                        )));
+                          },
+                          onEdit: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => EditScreen(
+                                          note: note[index],
+                                        )));
+                          },
                         );
                       }),
                   floatingActionButton: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       FloatingActionButton(
-                          child: (isTap == true)
-                              ? const Icon(Icons.unfold_less_sharp)
-                              : const Icon(Icons.menu),
-                          tooltip: 'Show less. Hide notes content',
-                          onPressed: () {
-                            setState(() {
-                              isTap = !isTap;
-                            });
-                          }),
+                        child: (isTap == true)
+                            ? const Icon(Icons.unfold_less_sharp)
+                            : const Icon(Icons.menu),
+                        tooltip: 'Show less. Hide notes content',
+                        onPressed: () {
+                          setState(() {
+                            isTap = !isTap;
+                          });
+                        },
+                        heroTag: const Text('Expand Button'),
+                      ),
 
                       /* Notes: for the "Show More" icon use: Icons.menu */
 
                       FloatingActionButton(
                         child: const Icon(Icons.add),
                         tooltip: 'Add a new note',
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const EditScreen()));
+                        },
+                        heroTag: const Text('New Button'),
                       ),
                     ],
                   ),
@@ -130,6 +155,8 @@ class _NoteList extends StatefulWidget {
   final Function() onLongPress;
   final bool isLongTap;
   final Function() onDelete;
+  final Function() onTap;
+  final Function() onEdit;
   const _NoteList({
     Key? key,
     required this.note,
@@ -137,6 +164,8 @@ class _NoteList extends StatefulWidget {
     required this.onLongPress,
     required this.isLongTap,
     required this.onDelete,
+    required this.onTap,
+    required this.onEdit,
   }) : super(key: key);
 
   @override
@@ -159,7 +188,7 @@ class _NoteListState extends State<_NoteList> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.edit, color: Colors.blue),
-                    onPressed: () {},
+                    onPressed: widget.onEdit,
                   ),
                   IconButton(
                     icon: const Icon(
@@ -172,7 +201,7 @@ class _NoteListState extends State<_NoteList> {
               ),
             )
           : const SizedBox(),
-      onTap: () {},
+      onTap: widget.onTap,
       onLongPress: widget.onLongPress,
     );
   }
