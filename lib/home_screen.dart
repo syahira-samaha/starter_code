@@ -129,7 +129,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const EditScreen()));
+                                  builder: (context) => const EditScreen(
+                                        isNew: true,
+                                      )));
                         },
                         heroTag: const Text('New Button'),
                       ),

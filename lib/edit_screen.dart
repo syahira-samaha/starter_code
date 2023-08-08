@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:map_exam/note.dart';
 
@@ -6,12 +8,16 @@ class EditScreen extends StatefulWidget {
   final bool isView;
   final bool isNew;
   final Note? note;
+  // final Function()? onCreate;
+  // final Function()? onEdit;
 
   const EditScreen({
     Key? key,
     this.isView = false,
     this.isNew = false,
     this.note,
+    // this.onCreate,
+    // this.onEdit,
   }) : super(key: key);
 
   @override
@@ -26,15 +32,18 @@ class _EditScreenState extends State<EditScreen> {
     final _descriptionController = TextEditingController(
         text: (widget.note != null) ? '${widget.note?.content}' : '');
 
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    var id = widget.note?.id;
+
     return Scaffold(
       appBar: AppBar(
         leading: Container(),
         centerTitle: true,
-        title: Text((widget.isView == false)
-            ? 'Edit Note'
+        title: Text((widget.isView == true)
+            ? 'View Note'
             : (widget.isNew == true)
                 ? 'New Note'
-                : 'View Note'),
+                : 'Edit Note'),
         actions: [
           if (widget.isView == false)
             IconButton(
@@ -42,7 +51,20 @@ class _EditScreenState extends State<EditScreen> {
                   Icons.check_circle,
                   size: 30,
                 ),
-                onPressed: () {}),
+                onPressed: () {
+                  final title = _titleController.text;
+                  final content = _descriptionController.text;
+
+                  FirebaseFirestore.instance
+                      .collection('notes-$uid')
+                      .doc('$id')
+                      .set({
+                    'title': title,
+                    'content': content,
+                  });
+
+                  Navigator.pop(context);
+                }),
           IconButton(
               icon: const Icon(
                 Icons.cancel_sharp,
