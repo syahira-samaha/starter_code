@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  bool isTap = false;
+  bool isTap = true;
 
   @override
   Widget build(BuildContext context) {
@@ -70,11 +70,21 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.blueGrey,
                           ),
                       itemBuilder: (context, index) {
+                        var id = note[index].id;
                         return _NoteList(
                           note: note[index],
                           isTap: isTap,
                           isLongTap: selectedTileIndex == index,
                           onLongPress: () => _handleTileLongPress(index),
+                          onDelete: () {
+                            print(note[index].id);
+                            setState(() {
+                              FirebaseFirestore.instance
+                                  .collection('notes-$uid')
+                                  .doc('$id')
+                                  .delete();
+                            });
+                          },
                         );
                       }),
                   floatingActionButton: Row(
@@ -82,8 +92,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       FloatingActionButton(
                           child: (isTap == true)
-                              ? const Icon(Icons.menu)
-                              : const Icon(Icons.unfold_less_sharp),
+                              ? const Icon(Icons.unfold_less_sharp)
+                              : const Icon(Icons.menu),
                           tooltip: 'Show less. Hide notes content',
                           onPressed: () {
                             setState(() {
@@ -119,12 +129,14 @@ class _NoteList extends StatefulWidget {
   final bool isTap;
   final Function() onLongPress;
   final bool isLongTap;
+  final Function() onDelete;
   const _NoteList({
     Key? key,
     required this.note,
     required this.isTap,
     required this.onLongPress,
     required this.isLongTap,
+    required this.onDelete,
   }) : super(key: key);
 
   @override
@@ -132,14 +144,6 @@ class _NoteList extends StatefulWidget {
 }
 
 class _NoteListState extends State<_NoteList> {
-  // bool isLongTap = false;
-
-  // void _toggleEditing() {
-  //   setState(() {
-  //     isLongTap = !isLongTap;
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -162,7 +166,7 @@ class _NoteListState extends State<_NoteList> {
                       Icons.delete,
                       color: Colors.blue,
                     ),
-                    onPressed: () {},
+                    onPressed: widget.onDelete,
                   ),
                 ],
               ),
